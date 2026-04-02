@@ -11,7 +11,7 @@ REGIONSIZE = 10 ** 6 * 2
 def parse_args():
     parser = argparse.ArgumentParser(description='filters and converts the format of juncBase output to make it usable for downstream analyses')
     parser.add_argument('-j', '--juncbase', required=True,
-                        help='juncbase table with full event info and inclusion;exclusion counts')
+                        help='juncbase table with full event info and exclusion;inclusion counts')
     parser.add_argument('-o', '--output', required=True,
                         help='output prefix')
     parser.add_argument('--gtf',
@@ -189,8 +189,8 @@ def extract_keys_from_juncbase(jbfile, chromstrandtoregiontojuncs, chromstrandto
     return header, keytoevents
 
 def calculate_inc_exc_vals(vals_str):
-    inclusion_vals = [int(x.split(';')[0]) for x in vals_str]
-    exclusion_vals = [int(x.split(';')[1]) for x in vals_str]
+    inclusion_vals = [int(x.split(';')[1]) for x in vals_str]
+    exclusion_vals = [int(x.split(';')[0]) for x in vals_str]
     tot_counts = [inclusion_vals[x] + exclusion_vals[x] for x in range(len(inclusion_vals))]
     PSI = [inclusion_vals[x] / tot_counts[x] if tot_counts[x] > 0 else 'NA' for x in range(len(inclusion_vals))]
     return inclusion_vals, exclusion_vals, tot_counts, PSI
@@ -238,7 +238,7 @@ def generate_overlap_groups(eventposlist):
 def collapse_groups_write_out(outprefix, header, einfotoepos):
 
     with open(outprefix + '.drimformat.tsv', 'w') as out, \
-        open(outprefix + 'jb.dedup.psi.tsv', 'w') as outpsi, \
+        open(outprefix + '.jb.dedup.psi.tsv', 'w') as outpsi, \
         open(outprefix + '.dedup.bed', 'w') as outbed:
 
 
@@ -265,7 +265,7 @@ def collapse_groups_write_out(outprefix, header, einfotoepos):
                 out.write('\t'.join([str(c), gene_id, feature_id] + [str(x) for x in exc]) + '\n')
                 c += 1
 
-                outpsi.write('\t'.join([gene_id] + myevent[-1][:11] + [str(round(100*x, 2)) if x != 'NA' else x for x in psi]))
+                outpsi.write('\t'.join([gene_id] + myevent[-1][:11] + [str(round(100*x, 2)) if x != 'NA' else x for x in psi]) + '\n')
 
 
 
